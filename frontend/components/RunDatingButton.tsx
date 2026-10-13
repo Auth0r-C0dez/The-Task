@@ -29,7 +29,9 @@ export function RunDatingButton() {
       <button type="button" className="btn-primary" disabled={loading} onClick={run}>
         {loading ? "Agents are dating…" : "Run all agent dates & view rankings"}
       </button>
-      {msg && <span className="text-sm text-white/60">{msg}</span>}
+      {msg && (
+        <span className="text-sm text-white/55 animate-[fade-in_0.4s_ease]">{msg}</span>
+      )}
     </div>
   );
 }

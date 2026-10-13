@@ -75,22 +75,29 @@ function extractFromHtml(html: string, baseUrl: string): {
   };
 }
 
-function normalizeLinkedIn(url: string): string {
-  const u = url.trim();
+export function normalizeLinkedIn(url: string): string {
+  let u = url.trim();
+  if (!u.startsWith("http")) u = `https://${u}`;
   if (!u.includes("linkedin.com")) {
-    throw new Error("Invalid LinkedIn URL");
+    throw new Error("Invalid LinkedIn URL — use a public linkedin.com/in/... profile");
   }
-  return u.split("?")[0].replace(/\/$/, "");
+  return u.split("?")[0].split("#")[0].replace(/\/$/, "");
 }
 
-function normalizeInstagram(url: string): string {
+export function normalizeInstagram(url: string): string {
   let u = url.trim();
   if (u.startsWith("@")) u = `https://www.instagram.com/${u.slice(1)}/`;
-  if (!u.includes("instagram.com")) {
-    throw new Error("Invalid Instagram URL");
+  if (!u.startsWith("http") && !u.includes("instagram.com")) {
+    u = `https://www.instagram.com/${u.replace(/^\/+/, "")}/`;
+  } else if (!u.startsWith("http")) {
+    u = `https://${u}`;
   }
+  if (!u.includes("instagram.com")) {
+    throw new Error("Invalid Instagram URL — use a public instagram.com/... profile");
+  }
+  u = u.split("?")[0].split("#")[0];
   if (!u.endsWith("/")) u += "/";
-  return u.split("?")[0];
+  return u;
 }
 
 export async function scrapePersonSources(

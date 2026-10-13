@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
-import Link from "next/link";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
-const sans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
-const display = Fraunces({ subsets: ["latin"], variable: "--font-display" });
+const sans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+});
+const display = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Agentic Dating",
@@ -20,31 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sans.variable} ${display.variable} font-sans antialiased`}>
-        <header className="border-b border-white/10">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-            <Link href="/" className="font-display text-2xl tracking-tight">
-              Agentic<span className="text-blush">Dating</span>
-            </Link>
-            <nav className="flex gap-4 text-sm text-white/80">
-              <Link href="/" className="hover:text-white">
-                Home
-              </Link>
-              <Link href="/people" className="hover:text-white">
-                People
-              </Link>
-              <Link href="/rankings" className="hover:text-white">
-                Rankings
-              </Link>
-              <Link href="/dates" className="hover:text-white">
-                Agent dates
-              </Link>
-              <Link href="/how-it-works" className="hover:text-white">
-                How it works
-              </Link>
-            </nav>
-          </div>
-        </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <div className="bg-atmosphere" aria-hidden />
+        <div className="bg-noise" aria-hidden />
+        <SiteHeader />
+        <main className="page-enter mx-auto max-w-6xl px-4 py-8 md:py-12">{children}</main>
+        <footer className="mx-auto max-w-6xl px-4 pb-12 pt-4 text-center text-xs text-white/35">
+          AgenticDating · LinkedIn + Instagram only · Agents date on your behalf
+        </footer>
       </body>
     </html>
   );

@@ -8,6 +8,10 @@ import {
   buildRankings,
   dateExists,
 } from "../services/rankings";
+import {
+  normalizeInstagram,
+  normalizeLinkedIn,
+} from "../services/scraper";
 import { loadDemoBundle, runDemoDating } from "../demo/demoService";
 
 const router = Router();
@@ -34,15 +38,26 @@ router.get("/people/:id", (req, res) => {
 router.post("/people", async (req, res) => {
   const parsed = addPersonSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.flatten() });
+    return res.status(400).json({ error: "Provide valid linkedinUrl and instagramUrl" });
+  }
+
+  let linkedinUrl: string;
+  let instagramUrl: string;
+  try {
+    linkedinUrl = normalizeLinkedIn(parsed.data.linkedinUrl);
+    instagramUrl = normalizeInstagram(parsed.data.instagramUrl);
+  } catch (e) {
+    return res.status(400).json({
+      error: e instanceof Error ? e.message : "Invalid profile URLs",
+    });
   }
 
   const duplicate = store
     .getPeople()
     .find(
       (p) =>
-        p.linkedinUrl === parsed.data.linkedinUrl ||
-        p.instagramUrl === parsed.data.instagramUrl
+        normalizeLinkedIn(p.linkedinUrl) === linkedinUrl ||
+        normalizeInstagram(p.instagramUrl) === instagramUrl
     );
   if (duplicate) {
     return res.status(409).json({
@@ -51,11 +66,22 @@ router.post("/people", async (req, res) => {
     });
   }
 
-  const person = await createAndProcessPerson(
-    parsed.data.linkedinUrl,
-    parsed.data.instagramUrl
-  );
+  const person = await createAndProcessPerson(linkedinUrl, instagramUrl);
   res.status(201).json({ person });
+});
+
+router.delete("/people/:id", (req, res) => {
+  const existing = store.getPerson(req.params.id);
+  if (!existing) {
+    return res.status(404).json({ error: "Person not found" });
+  }
+  const result = store.removePerson(req.params.id);
+  res.json({
+    ok: true,
+    personId: req.params.id,
+    removedDates: result.removedDates,
+    peopleRemaining: store.getPeople().length,
+  });
 });
 
 router.get("/dates", (_req, res) => {

@@ -10,7 +10,7 @@ https://your-vercel-app.vercel.app (click **Load demo & open rankings**)
 https://your-vercel-app.vercel.app
 
 ## GitHub URL
-https://github.com/you/agentic-dating
+https://github.com/Amirm143/The-Task
 
 ## Overall explanation (0/200)
 Agents scrape public LinkedIn/Instagram, analyze each person, simulate agent-to-agent dates, and rank best matches—Next.js on Vercel, Node API on Hostinger.

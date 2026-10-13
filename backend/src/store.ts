@@ -84,6 +84,27 @@ export function setDemoLoaded(value: boolean): void {
   saveState(state);
 }
 
+export function removePerson(id: string): {
+  removed: boolean;
+  removedDates: number;
+} {
+  const state = loadState();
+  const before = state.people.length;
+  state.people = state.people.filter((p) => p.id !== id);
+  if (state.people.length === before) {
+    return { removed: false, removedDates: 0 };
+  }
+  const beforeDates = state.dates.length;
+  state.dates = state.dates.filter(
+    (d) => d.personAId !== id && d.personBId !== id
+  );
+  if (state.people.length < 25) {
+    state.demoLoaded = false;
+  }
+  saveState(state);
+  return { removed: true, removedDates: beforeDates - state.dates.length };
+}
+
 export function clearAll(): void {
   saveState({ ...defaultState });
 }

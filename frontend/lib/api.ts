@@ -2,16 +2,36 @@ const API_BASE =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:4000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers || {}),
-    },
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.headers || {}),
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      `Cannot reach API at ${API_BASE}. Start the backend (cd backend && npm run dev) and check NEXT_PUBLIC_API_URL.`
+    );
+  }
   if (!res.ok) {
     const body = await res.text();
+    try {
+      const json = JSON.parse(body) as {
+        error?: string | { formErrors?: string[] };
+        personId?: string;
+      };
+      if (typeof json.error === "string") {
+        const err = new Error(json.error) as Error & { personId?: string };
+        if (json.personId) err.personId = json.personId;
+        throw err;
+      }
+    } catch (e) {
+      if (e instanceof Error && !(e instanceof SyntaxError)) throw e;
+    }
     throw new Error(body || res.statusText);
   }
   return res.json() as Promise<T>;
@@ -36,6 +56,11 @@ export interface Person {
   status: string;
   errorMessage?: string;
   analysis?: PersonAnalysis;
+  raw?: {
+    scrapeWarnings?: string[];
+    linkedinTitle?: string;
+    instagramTitle?: string;
+  };
   createdAt: string;
 }
 
@@ -78,6 +103,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ linkedinUrl, instagramUrl }),
     }),
+  removePerson: (id: string) =>
+    request<{
+      ok: boolean;
+      personId: string;
+      removedDates: number;
+      peopleRemaining: number;
+    }>(`/api/people/${id}`, { method: "DELETE" }),
   listDates: () => request<{ dates: AgentDate[] }>("/api/dates"),
   getDate: (id: string) => request<{ date: AgentDate }>(`/api/dates/${id}`),
   runAllDates: () =>

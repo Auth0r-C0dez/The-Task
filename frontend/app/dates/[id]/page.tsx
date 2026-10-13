@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Reveal } from "@/components/Reveal";
 import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -25,59 +26,82 @@ export default async function DateDetailPage({
   );
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <Link href="/dates" className="text-sm text-white/60 hover:text-white">
-        ← All agent dates
-      </Link>
-      <header className="space-y-2">
-        <h1 className="font-display text-3xl">
-          {nameById.get(date.personAId)} & {nameById.get(date.personBId)}
-        </h1>
-        <p className="chip inline-block">{date.compatibilityScore}% compatibility</p>
-        <p className="text-white/75">{date.summary}</p>
-      </header>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <Reveal>
+        <Link
+          href="/dates"
+          className="text-sm text-white/55 transition hover:text-white"
+        >
+          ← All agent dates
+        </Link>
+      </Reveal>
+
+      <Reveal delay={1}>
+        <header className="space-y-3">
+          <h1 className="font-display text-4xl leading-tight">
+            {nameById.get(date.personAId)}{" "}
+            <span className="text-blush">&</span> {nameById.get(date.personBId)}
+          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="chip border-blush/30 text-blush">
+              {date.compatibilityScore}% compatibility
+            </p>
+            <div className="score-bar w-40">
+              <span style={{ width: `${date.compatibilityScore}%` }} />
+            </div>
+          </div>
+          <p className="text-white/70">{date.summary}</p>
+        </header>
+      </Reveal>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="glass rounded-xl p-4">
-          <h2 className="font-display text-lg mb-2">Highlights</h2>
-          <ul className="text-sm space-y-1 text-white/80">
-            {date.highlights.map((h) => (
-              <li key={h}>• {h}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="glass rounded-xl p-4">
-          <h2 className="font-display text-lg mb-2">Concerns</h2>
-          <ul className="text-sm space-y-1 text-white/80">
-            {date.concerns.length ? (
-              date.concerns.map((c) => <li key={c}>• {c}</li>)
-            ) : (
-              <li className="text-white/50">None flagged</li>
-            )}
-          </ul>
-        </div>
+        <Reveal delay={2}>
+          <div className="glass glass-hover rounded-3xl p-5">
+            <h2 className="mb-3 font-display text-xl">Highlights</h2>
+            <ul className="space-y-2 text-sm text-white/80">
+              {date.highlights.map((h) => (
+                <li key={h}>• {h}</li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+        <Reveal delay={3}>
+          <div className="glass glass-hover rounded-3xl p-5">
+            <h2 className="mb-3 font-display text-xl">Concerns</h2>
+            <ul className="space-y-2 text-sm text-white/80">
+              {date.concerns.length ? (
+                date.concerns.map((c) => <li key={c}>• {c}</li>)
+              ) : (
+                <li className="text-white/45">None flagged</li>
+              )}
+            </ul>
+          </div>
+        </Reveal>
       </div>
 
-      <div className="glass rounded-2xl p-5 space-y-4">
-        <h2 className="font-display text-xl">Agent date transcript</h2>
-        {date.transcript.map((line, i) => (
-          <div
-            key={i}
-            className={`rounded-xl px-4 py-3 text-sm ${
-              line.speaker === "agent_a"
-                ? "bg-violet/20 border border-violet/30 ml-0 mr-8"
-                : "bg-blush/15 border border-blush/25 ml-8 mr-0"
-            }`}
-          >
-            <p className="text-xs uppercase tracking-wide text-white/50 mb-1">
-              {line.speaker === "agent_a"
-                ? `Agent for ${nameById.get(date.personAId)}`
-                : `Agent for ${nameById.get(date.personBId)}`}
-            </p>
-            <p className="text-white/90">{line.message}</p>
-          </div>
-        ))}
-      </div>
+      <Reveal delay={4}>
+        <div className="glass space-y-4 rounded-3xl p-6">
+          <h2 className="font-display text-2xl">Agent date transcript</h2>
+          {date.transcript.map((line, i) => (
+            <div
+              key={i}
+              className={`rounded-2xl px-4 py-3 text-sm transition hover:scale-[1.01] ${
+                line.speaker === "agent_a"
+                  ? "mr-8 border border-violet/35 bg-violet/20"
+                  : "ml-8 border border-blush/30 bg-blush/15"
+              }`}
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <p className="mb-1 text-xs uppercase tracking-wide text-white/45">
+                {line.speaker === "agent_a"
+                  ? `Agent for ${nameById.get(date.personAId)}`
+                  : `Agent for ${nameById.get(date.personBId)}`}
+              </p>
+              <p className="text-white/90 leading-relaxed">{line.message}</p>
+            </div>
+          ))}
+        </div>
+      </Reveal>
     </div>
   );
 }
